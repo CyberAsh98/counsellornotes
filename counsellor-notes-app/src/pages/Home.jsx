@@ -16,7 +16,7 @@ export default function Home() {
   const nav = useNavigate()
 
   useEffect(() => {
-    api.getPatients().then(setPatients).catch(() => {}).finally(() => setLoading(false))
+    api.getPatients().then(r => { if (r.data) setPatients(r.data) }).finally(() => setLoading(false))
   }, [])
 
   const overdue = patients.filter(p => (daysSince(p.last_session_at) ?? -1) >= 21)

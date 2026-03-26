@@ -15,7 +15,7 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });
 
     const url = new URL(request.url);
-    if (!url.pathname.startsWith('/api/')) return new Response('Not found', { status: 404 });
+    const rawPath = url.pathname.startsWith("/api") ? url.pathname.replace("/api", "") : url.pathname;
 
     // ── Validate JWT ────────────────────────────────────────
     const auth = request.headers.get('Authorization') || '';
@@ -26,7 +26,7 @@ export default {
     if (!user) return json({ error: 'Invalid token' }, 401);
 
     // ── Route ───────────────────────────────────────────────
-    const path = url.pathname.replace('/api', '');
+    const path = rawPath;
     const method = request.method;
     let body = null;
     if (method !== 'GET' && method !== 'DELETE') {
@@ -43,14 +43,14 @@ export default {
 
 // ── Router ───────────────────────────────────────────────────
 async function route(path, method, body, user, url, env) {
-  const uid = user.sub;
+  const uid = user.id || user.sub;
   const sb = supabase(env);
 
   // GET /patients — list own patients (PII joined)
   if (path === '/patients' && method === 'GET') {
     const { data, error } = await sb
       .from('patients')
-      .select('*, pii:pii_id(*)')
+      .select('*')
       .eq('therapist_id', uid)
       .order('last_session_at', { ascending: false, nullsFirst: false });
     if (error) throw error;
@@ -81,7 +81,7 @@ async function route(path, method, body, user, url, env) {
     const id = path.split('/')[2];
     const { data, error } = await sb
       .from('patients')
-      .select('*, pii:pii_id(*)')
+      .select('*')
       .eq('id', id).eq('therapist_id', uid).single();
     if (error) return json({ error: 'Not found' }, 404);
     return json(data);

@@ -5,7 +5,7 @@ import { api } from '../lib/api'
 const COLORS = ['#7C9E87','#9B7E5A','#6B8FAB','#A87C8C','#7A9BAB','#9E8F7C']
 const avatarColor = n => COLORS[(n||'').charCodeAt(0) % COLORS.length]
 const initials = n => (n||'?').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase()
-const fmt = d => d ? new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'
+const fmt = d => d ? new Date(d.length<=10?d+'T12:00:00':d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'
 
 const TABS = ['Overview','Sessions','Timeline','Goals','Inter-Session','Insights','Risk','Snapshot','Export']
 
@@ -136,7 +136,7 @@ export default function PatientDetail() {
               {sessions.map((s,i) => (
                 <div key={s.id} className="card">
                   <div className="card-header">
-                    <span className="card-title">Session {sessions.length - i} — {fmt(s.date)}</span>
+                    <span className="card-title">Session {i + 1} — {fmt(s.date)}</span>
                     <div style={{ display:'flex', gap:8, alignItems:'center' }}>
                       {s.risk_status === 'red' && <span className="risk-flag-badge">⚠ Risk</span>}
                       <span className="tag tag-muted tag-sm">{s.format || 'in-person'}</span>
@@ -382,7 +382,7 @@ function RiskTab({ sessions }) {
             <div key={s.id} className="card" style={{ borderLeft:`3px solid ${s.risk_status==='red'?'#C9504A':'#D4954A'}` }}>
               <div className="card-body-sm">
                 <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
-                  <b>{new Date(s.date).toLocaleDateString()}</b>
+                  <b>{new Date(s.date.length<=10?s.date+"T12:00:00":s.date).toLocaleDateString()}</b>
                   <span className={s.risk_status==='red'?'risk-flag-badge':'tag tag-warning tag-sm'}>{s.risk_status}</span>
                 </div>
                 {s.theme && <div className="field-value">{s.theme}</div>}
@@ -428,7 +428,7 @@ function SnapshotTab({ sessions }) {
             <tbody>
               {sessions.map(s=>(
                 <tr key={s.id} style={{ borderTop:'1px solid var(--border)' }}>
-                  <td style={{ padding:'8px 10px' }}>{new Date(s.date).toLocaleDateString()}</td>
+                  <td style={{ padding:'8px 10px' }}>{new Date(s.date.length<=10?s.date+"T12:00:00":s.date).toLocaleDateString()}</td>
                   <td style={{ padding:'8px 10px', color:'var(--text-muted)' }}>{s.arrive_state||'—'}</td>
                   <td style={{ padding:'8px 10px', color:'var(--text-muted)' }}>{s.leave_state||'—'}</td>
                   <td style={{ padding:'8px 10px' }}>{s.theme||'—'}</td>
@@ -455,7 +455,7 @@ function ExportTab({ patient, sessions, history }) {
     <h2>Presenting Issue</h2><p>${patient.presenting_issue||'Not recorded'}</p>
     <h2>Sessions (${sessions.length})</h2>
     <table><tr style="font-weight:600"><td>Date</td><td>Theme</td><td>Intervention</td><td>Risk</td></tr>
-    ${sessions.map(s=>`<tr><td>${new Date(s.date).toLocaleDateString()}</td><td>${s.theme||'—'}</td><td>${s.intervention||'—'}</td><td>${s.risk_status||'green'}</td></tr>`).join('')}
+    ${sessions.map(s=>`<tr><td>${new Date(s.date.length<=10?s.date+"T12:00:00":s.date).toLocaleDateString()}</td><td>${s.theme||'—'}</td><td>${s.intervention||'—'}</td><td>${s.risk_status||'green'}</td></tr>`).join('')}
     </table>
     <h2>Timeline</h2>
     ${history.map(h=>`<p><b>${new Date(h.occurred_at).toLocaleDateString()} [${h.category}]</b> ${h.title}${h.body?': '+h.body:''}</p>`).join('')}

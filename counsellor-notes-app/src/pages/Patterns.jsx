@@ -29,8 +29,8 @@ export default function Patterns() {
   const themeMap = {}
   allSessions.forEach(s => {
     if (!s.theme) return
-    const words = s.theme.toLowerCase().split(/[\s,]+/).filter(w=>w.length>3)
-    words.forEach(w => { themeMap[w] = (themeMap[w]||0) + 1 })
+    const phrase = s.theme.trim()
+    themeMap[phrase] = (themeMap[phrase]||0) + 1
   })
   const topThemes = Object.entries(themeMap).sort((a,b)=>b[1]-a[1]).slice(0,12)
 
